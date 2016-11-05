@@ -2,13 +2,14 @@ function content($slide) {
   return $slide.children().first().nextAll();
 }
 
-function addReplToSlide($, $slide) {
-  content($slide).wrapAll('<div class="slide-column"></div>');
+function addReplToSlide($, deck, $slide) {
+  var endpoint = $[deck]('getOptions').repl.endpoint;
+  content($slide).wrapAll('<div class="slide-column text-column"></div>');
   var replHtmlId = "console-" + $slide[0].id;
-  $('<div/>', { id: replHtmlId, class: 'slide-column console' })
+  $('<div/>', { id: replHtmlId, class: 'slide-column console-column' })
     .appendTo($slide);
   $('<script></script>')
-    .append("$(function () { newConsole($('#" + replHtmlId + "')); });")
+    .append("$(function () { newConsole('" + endpoint + "', $('#" + replHtmlId + "')); });")
     .appendTo($slide);
   content($slide).wrapAll('<div class="slide-columns"></div>');
 }
@@ -16,11 +17,15 @@ function addReplToSlide($, $slide) {
 function protocol() {
   switch (location.protocol) {
     case 'https:': return 'wss:';
-    default: 'ws:'
+    default:       return 'ws:';
   }
 }
 
-function newConsole(element) {
+function url(endpoint) {
+  return protocol() + endpoint;
+}
+
+function newConsole(endpoint, element) {
   var jqconsole = element.jqconsole("", "> ");
   var writeText = function(text) {
     jqconsole.Write(text, 'jqconsole-output');
@@ -31,17 +36,17 @@ function newConsole(element) {
     startPrompt();
   }
 
-  var url = protocol() + '//echo.websocket.org/';
   var connect = function () {
-    var ws = new WebSocket(url);
+    var ws = new WebSocket(url(endpoint));
     ws.onmessage = function(event) {
+      jqconsole.Enable();
       writeText(event.data);
     };
     ws.onerror = function(event) {
       writeError("Connection error\n");
     };
     ws.onopen = function(event) {
-      writeText("Ready\n");
+      ws.send("/load Example2");
     };
     return ws;
   }
@@ -60,6 +65,7 @@ function newConsole(element) {
       }
     });
   };
+  jqconsole.Disable();
 
   startPrompt();
 };
@@ -71,28 +77,44 @@ function toggleOrder(i, order) {
   }
 }
 
+function isKey(e, keyValue) {
+  return e.which === keyValue || $.inArray(e.which, keyValue) > -1;
+}
+
 (function($, deck, window, undefined) {
   var $d = $(document);
 
   /*
     Extends defaults/options.
 
-    options.keys.repl
+    options.keys.replPositionToggle
     Key to toggle REPL position between left and right (right by default).
+    Default key is 'T'.
+
+    options.keys.replFullscreenToggle
+    Key to toggle REPL to fullscreen, hiding the other column and slide title.
+    Default key is 'F'.
+
+    options.repl.endpoint
+    URL of the websocket endpoint to use for REPL without the protocol part.
   */
   $.extend(true, $[deck].defaults, {
     classes: {
       repl: 'deck-repl'
     },
     keys: {
-      repl: 84 // t
+      replPositionToggle:   84, // t
+      replFullscreenToggle: 70  // f
+    },
+    repl: {
+      endpoint: '//echo.websocket.org/'
     }
   });
 
   $d.bind('deck.beforeInit', function() {
     $.each($[deck]('getSlides'), function(i, $slide) {
       if ($slide.hasClass('repl')) {
-        addReplToSlide($, $slide);
+        addReplToSlide($, deck, $slide);
       }
     });
   });
@@ -103,15 +125,25 @@ function toggleOrder(i, order) {
     Toggles REPL position (right column first).
   */
   $[deck]('extend', 'toggleReplPosition', function() {
-    $('.console').css('order', toggleOrder);
+    $('.console-column').css('order', toggleOrder);
+  });
+
+  $[deck]('extend', 'toggleReplFullscreen', function() {
+    $('.deck-current .slide-columns').siblings().toggle();
+    $('.deck-current .text-column').toggle();
+    $('.deck-current .console-column').toggleClass('console-column-fullscreen');
   });
 
   $d.bind('deck.init', function() {
     var opts = $[deck]('getOptions');
     // Bind key events
     $d.unbind('keydown.deckrepl').bind('keydown.deckrepl', function(e) {
-      if (e.which === opts.keys.repl || $.inArray(e.which, opts.keys.repl) > -1) {
+      if (isKey(e, opts.keys.replPositionToggle)) {
         $[deck]('toggleReplPosition');
+        e.preventDefault();
+      }
+      if (isKey(e, opts.keys.replFullscreenToggle)) {
+        $[deck]('toggleReplFullscreen');
         e.preventDefault();
       }
     });
