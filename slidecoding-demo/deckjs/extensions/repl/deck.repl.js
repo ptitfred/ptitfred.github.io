@@ -4,14 +4,14 @@ function content($slide) {
 
 function addReplToSlide($, deck, $slide) {
   var endpoint = $[deck]('getOptions').repl.endpoint;
-  content($slide).wrapAll('<div class="slide-column text-column"></div>');
+  content($slide).wrapAll('<div class="repl-slide-column repl-text-column"></div>');
   var replHtmlId = "console-" + $slide[0].id;
-  $('<div/>', { id: replHtmlId, class: 'slide-column console-column' })
+  $('<div/>', { id: replHtmlId, class: 'repl-slide-column repl-console-column' })
     .appendTo($slide);
   $('<script></script>')
     .append("$(function () { newConsole('" + endpoint + "', $('#" + replHtmlId + "')); });")
     .appendTo($slide);
-  content($slide).wrapAll('<div class="slide-columns"></div>');
+  content($slide).wrapAll('<div class="repl-slide-columns"></div>');
 }
 
 function protocol() {
@@ -25,8 +25,20 @@ function url(endpoint) {
   return protocol() + endpoint;
 }
 
+function getContext(element) {
+  return element.attr('data-repl-context') || element.parents('[data-repl-context]').attr('data-repl-context');
+}
+
+function hasContext(element) {
+  var ctx = getContext(element);
+  return ctx !== undefined && ctx !== "";
+}
+
 function newConsole(endpoint, element) {
+  var replContext = getContext(element);
   var jqconsole = element.jqconsole("", "> ");
+
+  var startPrompt;
   var writeText = function(text) {
     jqconsole.Write(text, 'jqconsole-output');
     startPrompt();
@@ -36,39 +48,56 @@ function newConsole(endpoint, element) {
     startPrompt();
   }
 
-  var connect = function () {
-    var ws = new WebSocket(url(endpoint));
-    ws.onmessage = function(event) {
-      jqconsole.Enable();
-      writeText(event.data);
-    };
-    ws.onerror = function(event) {
-      writeError("Connection error\n");
-    };
-    ws.onopen = function(event) {
-      ws.send("/load Example2");
-    };
-    return ws;
-  }
-  var ws = connect();
-
-  var startPrompt = function () {
-    jqconsole.Prompt(true, function (input) {
-      if (input === '/reconnect') {
-        ws = connect();
-      } else if (input !== '') {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(input);
-        } else {
-          writeError("Not connected.");
-        }
-      }
-    });
-  };
   jqconsole.Disable();
 
-  startPrompt();
+  addFullscreenHint(element);
+
+  if (endpoint) {
+    var connect = function () {
+      var ws = new WebSocket(url(endpoint));
+      ws.onmessage = function(event) {
+        jqconsole.Enable();
+        writeText(event.data);
+      };
+      ws.onerror = function(event) {
+        writeError("Connection error\n");
+      };
+      ws.onopen = function(event) {
+        ws.send("/load " + replContext);
+      };
+      return ws;
+    }
+    var ws = connect();
+
+    startPrompt = function () {
+      jqconsole.Prompt(true, function (input) {
+        if (input === '/reconnect') {
+          ws = connect();
+        } else if (input !== '') {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(input);
+          } else {
+            writeError("Not connected.");
+          }
+        }
+      });
+    };
+
+    startPrompt();
+  } else {
+    startPrompt = function() {};
+
+    writeText("REPL offline.\n" +
+              "No livecoding for you :-(");
+
+    jqconsole.Prompt(true, function() {});
+  }
+
 };
+
+function addFullscreenHint(element) {
+  $('<div/>', { class: 'repl-fullscreen-hint', text: 'Fullscreen — Hit F to quit' }).appendTo(element);
+}
 
 function toggleOrder(i, order) {
   switch (order) {
@@ -107,13 +136,13 @@ function isKey(e, keyValue) {
       replFullscreenToggle: 70  // f
     },
     repl: {
-      endpoint: '//echo.websocket.org/'
+      endpoint: ''
     }
   });
 
   $d.bind('deck.beforeInit', function() {
     $.each($[deck]('getSlides'), function(i, $slide) {
-      if ($slide.hasClass('repl')) {
+      if ($slide.hasClass('repl') && hasContext($slide)) {
         addReplToSlide($, deck, $slide);
       }
     });
@@ -125,13 +154,13 @@ function isKey(e, keyValue) {
     Toggles REPL position (right column first).
   */
   $[deck]('extend', 'toggleReplPosition', function() {
-    $('.console-column').css('order', toggleOrder);
+    $('.repl-console-column').css('order', toggleOrder);
   });
 
   $[deck]('extend', 'toggleReplFullscreen', function() {
-    $('.deck-current .slide-columns').siblings().toggle();
-    $('.deck-current .text-column').toggle();
-    $('.deck-current .console-column').toggleClass('console-column-fullscreen');
+    $('.deck-current .repl-slide-columns').siblings().toggle();
+    $('.deck-current .repl-text-column').toggle();
+    $('.deck-current .repl-console-column').toggleClass('repl-console-column-fullscreen');
   });
 
   $d.bind('deck.init', function() {
