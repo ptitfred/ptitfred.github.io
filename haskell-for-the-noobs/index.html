@@ -1,0 +1,253 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Haskell for the noobs</title><link rel="icon" type="image/png" href="assets/icon.png"><link rel="stylesheet" media="screen" href="slidecoding.css"><script src="highlight-pack-haskell.js"></script><link rel="stylesheet" media="screen" href="paraiso-dark-min.css"><script>hljs.initHighlightingOnLoad();</script><script src="deckjs/jquery.min.js"></script><script src="deckjs/modernizr.custom.js"></script><script src="deckjs/core/deck.core.js"></script><link rel="stylesheet" media="screen" href="deckjs/core/deck.core.css"><link rel="stylesheet" media="print" href="deckjs/core/print.css"><link rel="stylesheet" media="screen" href="deckjs/themes/style/neon.css"><link rel="stylesheet" media="screen" href="assets/custom.css"><link rel="stylesheet" media="screen" href="deckjs/themes/transition/fade.css"><link rel="stylesheet" media="screen" href="deckjs/extensions/fit/deck.fit-fs.css"><script src="deckjs/extensions/fit/deck.fit.js"></script><link rel="stylesheet" media="screen" href="deckjs/extensions/repl/deck.repl.css"><script src="deckjs/extensions/repl/deck.repl.js"></script><script src="jqconsole.min.js"></script><script src="deckjs/extensions/lichess/deck.lichess.js"></script></head><body class="deck-container"><!-- 201611-haskell-for-the-noobs/presentation.yaml --><section class="slide presentation-title"><h1>Haskell for the noobs</h1></section><!-- 201611-haskell-for-the-noobs/slides/1-functions.md --><section class="slide chapter-title" data-repl-context="functions" id="1-functions"><h1>functions!</h1></section><section class="slide repl" data-repl-context="functions" id="fresh-examples"><h2>Fresh examples</h2>
+<pre class="haskell"><code>hello = putStrLn &quot;Hello DevFest Nantes!&quot;</code></pre>
+<pre class="haskell"><code>helloFred = do
+  putStrLn &quot;Hello Nantes,&quot;
+  putStrLn &quot;my name is Fred!&quot;</code></pre>
+<pre class="haskell"><code>square x = x ^ 2
+
+map square [1, 2, 3]
+
+map square [1..10]</code></pre></section><section class="slide repl" data-repl-context="functions" id="function-application"><h2>Function application</h2>
+<h3 id="signature">Signature</h3>
+<pre class="haskell"><code>fun :: Type1 -&gt; Type2 -&gt; Type3 -&gt; Type4
+fun arg1 arg2 arg3 = expression</code></pre>
+<h3 id="every-expression-is-a-function">Every expression is a function</h3>
+<pre class="haskell"><code>constant :: Int
+constant = 2</code></pre>
+<pre class="haskell"><code>increment :: Int -&gt; Int
+increment a = a + 1</code></pre>
+<p><a href="source://Utils/addition"></a></p></section><section class="slide repl" data-repl-context="functions" id="partially-applied-functions"><h2>Partially applied functions</h2>
+<pre class="haskell"><code>increment a = add 1 a</code></pre>
+<p>simplified into</p>
+<pre class="haskell"><code>increment = add 1</code></pre>
+<p>Similarly</p>
+<pre class="haskell"><code>add a b = a + b
+
+add a b = (+) a b
+
+add = (+)</code></pre></section><section class="slide repl" data-repl-context="functions" id="lets-compose"><h2>Let's compose</h2>
+<p>The dot operator</p>
+<pre class="haskell"><code>(.) :: (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c</code></pre>
+<pre class="haskell"><code>incrementTwice n = (increment . increment) n</code></pre>
+<pre class="haskell"><code>incrementTwice = increment . increment</code></pre></section><section class="slide" data-repl-context="functions" id="pure-functions"><h2>Pure functions</h2>
+<h3 id="signature-define-all-the-action">Signature define all the action</h3>
+<p>Functions in Haskell are like functions in maths.</p>
+<p>Very handy for parallel computing but... how do you do anything?</p></section><section class="slide" data-repl-context="functions" id="polymorphism"><h2>Polymorphism</h2>
+<h3 id="parametric-polymorphism">Parametric polymorphism</h3>
+<pre class="haskell"><code>map :: (a -&gt; b) -&gt; [a] -&gt; [b]</code></pre>
+<p><code>map</code> is parametrically polymorphism: implementation doesn't depends on <code>a</code> and <code>b</code>.</p></section><section class="slide repl" data-repl-context="functions" id="polymorphism-1"><h2>Polymorphism</h2>
+<h3 id="ad-hoc-polymorphism-type-classes">Ad-hoc polymorphism &amp; type classes</h3>
+<pre class="haskell"><code>(+) :: Num a =&gt; a -&gt; a -&gt; a</code></pre>
+<p><code>+</code> is ad-hoc polymorphism: implementation is type dependent</p>
+<p><code>Num</code> is a type class : a trait that you can implement outside the datatype definition.</p>
+<p><strong>Polymorphism on return type</strong></p>
+<pre class="haskell"><code>fromInteger :: Num a =&gt; Integer -&gt; a
+
+mempty :: Monoid a =&gt; a</code></pre></section><!-- 201611-haskell-for-the-noobs/slides/2-datatypes.md --><section class="slide chapter-title" data-repl-context="prelude" id="2-datatypes"><h1>data!</h1></section><section class="slide repl" data-repl-context="prelude" id="data-structures-made-easy"><h2>Data structures made easy</h2>
+<pre class="haskell"><code>data MyType = MyConstructor Attribute1 Attribute2</code></pre>
+<p>Multiple constructors possible</p>
+<pre class="haskell"><code>data Color = Red | Blue | Green</code></pre>
+<p>Data type can be parametric</p>
+<pre class="haskell"><code>data Vector a = Vector a</code></pre></section><section class="slide repl" data-repl-context="prelude" id="functor"><h2>Functor</h2>
+<p>Generalize mapping over a parametric datatype</p>
+<pre class="haskell"><code>map :: (a -&gt; b) -&gt; [a] -&gt; [b]</code></pre>
+<pre class="haskell"><code>fmap :: Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b</code></pre>
+<pre class="haskell"><code>fmap (+1) (Just 1)
+fmap (+1) [1, 2, 3]</code></pre></section><section class="slide repl" data-repl-context="prelude" id="various-functors"><h2>Various functors</h2>
+<h3 id="maybe">Maybe</h3>
+<pre class="haskell"><code>(*2) &lt;$&gt; Just 1
+(*2) &lt;$&gt; Nothing</code></pre>
+<h3 id="io">IO</h3>
+<pre class="haskell"><code>getLine :: IO String
+
+getInt :: IO Int
+getInt = read &lt;$&gt; getLine</code></pre></section><section class="slide repl" data-repl-context="prelude" id="applicatives"><h2>Applicatives</h2>
+<p>Generalize functors to multiple arguments functions</p>
+<pre class="haskell"><code>(+) &lt;$&gt; Just 1 &lt;*&gt; Just 2</code></pre>
+<pre class="haskell"><code>(++) &lt;$&gt; getLine &lt;*&gt; getLine</code></pre></section><!-- 201611-haskell-for-the-noobs/slides/3-parsec.md --><section class="slide chapter-title" data-repl-context="FEN" id="3-parsec"><h1>Parsec</h1></section><section class="slide repl" data-repl-context="FEN" id="parser-combinator"><h2>Parser Combinator</h2>
+<p>Build parser by combining other parsers, with basic parsers</p>
+<pre class="haskell"><code>char :: Char -&gt; Parser Char
+string :: String -&gt; Parser String</code></pre>
+<pre class="haskell"><code>space :: Parser Char
+space = char &#39; &#39; </code></pre></section><section class="slide repl" data-repl-context="FEN" id="parser-combinator-1"><h2>Parser Combinator</h2>
+<h3 id="build-by-combining-and-fmapping">Build by combining and fmapping</h3>
+<pre class="haskell"><code>oneOf :: [Char] -&gt; Parser Char
+many :: Parser a -&gt; Parser [a]
+many1 :: Parser a -&gt; Parser [a]</code></pre>
+<pre class="haskell"><code>parsePiece :: Parser Piece
+parsePiece = decodePiece &lt;$&gt; oneOf &quot;PNBRQK&quot;</code></pre>
+<pre class="haskell"><code>decodePiece &#39;P&#39; = Pawn
+decodePiece &#39;N&#39; = Knight
+decodePiece &#39;B&#39; = Bishop
+decodePiece &#39;R&#39; = Rook
+decodePiece &#39;Q&#39; = Queen
+decodePiece &#39;K&#39; = King</code></pre></section><!-- 201611-haskell-for-the-noobs/slides/4-chess.md --><section class="slide chapter-title" data-repl-context="FEN" id="4-chess"><h1>Knights &amp; Bishops</h1></section><section class="slide" data-repl-context="FEN" id="world-championship-2016"><h2>World Championship 2016</h2>
+<h3 id="carlsen---karjakin-11-30-november-new-york">Carlsen - Karjakin, 11-30 November, New-York</h3>
+<div class="figure">
+<img src="assets/Magnus-Carlsen-and-Karjakin.jpg" alt="Credits Nina Berglund" />
+<p class="caption">Credits Nina Berglund</p>
+</div></section><section class="slide" data-repl-context="FEN" id="on-révise"><h2>On révise</h2>
+<p><a href="lichess://8mWFjPNF"></a></p></section><section class="slide" data-repl-context="FEN" id="pgn"><h2>PGN</h2>
+<p><a href="https://en.wikipedia.org/wiki/Portable_Game_Notation">Portable Game Notation</a>, context of the game and notation of moves.</p>
+<pre class="text"><code>[Event &quot;F/S Return Match&quot;]
+[Site &quot;Belgrade, Serbia JUG&quot;]
+[Date &quot;1992.11.04&quot;]
+[Round &quot;29&quot;]
+[White &quot;Fischer, Robert J.&quot;]
+[Black &quot;Spassky, Boris V.&quot;]
+[Result &quot;1/2-1/2&quot;]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3
+O-O 9. h3 Nb8 10. d4 Nbd7 11. c4 c6 12. cxb5 axb5 13. Nc3 Bb7 14. Bg5 b4 15.
+Nb1 h6 16. Bh4 c5 17. dxe5 Nxe4 18. Bxe7 Qxe7 19. exd6 Qf6 20. Nbd2 Nxd6 21.
+Nc4 Nxc4 22. Bxc4 Nb6 23. Ne5 Rae8 24. Bxf7+ Rxf7 25. Nxf7 Rxe1+ 26. Qxe1 Kxf7
+27. Qe3 Qg5 28. Qxg5 hxg5 29. b3 Ke6 30. a3 Kd6 31. axb4 cxb4 32. Ra5 Nd5 33.
+f3 Bc8 34. Kf2 Bf5 35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5
+40. Rd6 Kc5 41. Ra6 Nf2 42. g4 Bd3 43. Re6 1/2-1/2</code></pre></section><section class="slide" data-repl-context="FEN" id="pgn-1"><h2>PGN</h2>
+<p>PGN files can also include annotations and variations (here look at moves 19. and 22.)</p>
+<pre class="text"><code>[Event &quot;Interclubs FRA&quot;]
+[Site &quot;?&quot;]
+[Date &quot;????.??.??&quot;]
+[Round &quot;?&quot;]
+[White &quot;Calistri, Tristan&quot;]
+[Black &quot;Bauduin, Etienne&quot;]
+[Result &quot;1-0&quot;]
+
+1.e4 c5 2.Nf3 e6 3.d4 cxd4 4.Nxd4 Nc6 5.Nc3 a6 6.Be2 Qc7 7.O-O Nf6 8.Be3 Bb4 
+9.Na4 O-O 10.c4 Bd6 11.g3 Nxe4 12.Bf3 f5 13.Bxe4 fxe4 14.c5 Be7 {Les Noirs ont 
+un pion d&#39;avance mais de gros problèmes pour mettre leur Fc8 et leur Ta8 en jeu} 
+15.Qg4 Ne5 16.Qxe4 d5 17.cxd6 Bxd6 18.Rac1 Qa5 19.Nb3 +/- {D} { Les blancs ont 
+récupéré leur pion et toutes leurs pièces sont mobilisées  }
+19...Qb4 
+    (19...Qd5 20.Qxd5 exd5 21.Nb6 Bh3 22.Nxa8 Nf3+ 23.Kh1 Bxf1 24.Rxf1 Rxa8 25.Rd1±)
+    (19...Nf3+ 20.Kg2 Qh5)
+20.Qxb4 Bxb4 21.Nb6 $18 {Les noirs n&#39;arriveront jamais à sortir leur Fc8}
+21...Rb8 22.Bc5 Bxc5 
+    (22...Nd3 23.Bxf8 Nxc1 24.Rxc1 Bxf8 25.Rxc8 Rxc8 26.Nxc8 +/-)
+23.Nxc5 Rd8 24.Rfd1 Re8 25.Ne4 Nf7 26.Rc7 Kf8 27.Rdc1 1-0</code></pre></section><section class="slide" data-repl-context="FEN" id="fen"><h2>FEN</h2>
+<p><a href="https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation">Forsyth–Edwards Notation</a>, describes a position and let you start over from it.</p>
+<pre><code>rnbqkbnr/pp2pppp/2p5/3P4/3P4/8/PP2PPPP/RNBQKBNR b KQkq - 0 3</code></pre>
+<pre class="text"><code>rnbqkbnr/pp2pppp/2p5/3P4/3P4/8/PP2PPPP/RNBQKBNR   &lt;--   board
+                                              b   &lt;--   player to move (w or b)
+                                           KQkq   &lt;--   available castling sides
+                                              -   &lt;--   en passant?
+                                              0   &lt;--   half-moves since last capture
+                                              3   &lt;--   moves</code></pre></section><section class="slide" data-repl-context="FEN" id="pieces"><h2>Pieces</h2>
+<p>Pieces are encoded with english names</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="center">English</th>
+<th align="center">French</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>P</code></td>
+<td align="center">Pawn</td>
+<td align="center">Pion</td>
+</tr>
+<tr class="even">
+<td><code>N</code></td>
+<td align="center">Knight</td>
+<td align="center">Cavalier</td>
+</tr>
+<tr class="odd">
+<td><code>B</code></td>
+<td align="center">Bishop</td>
+<td align="center">Fou</td>
+</tr>
+<tr class="even">
+<td><code>R</code></td>
+<td align="center">Rook</td>
+<td align="center">Tour</td>
+</tr>
+<tr class="odd">
+<td><code>Q</code></td>
+<td align="center">Queen</td>
+<td align="center">Dame</td>
+</tr>
+<tr class="even">
+<td><code>K</code></td>
+<td align="center">King</td>
+<td align="center">Roi</td>
+</tr>
+</tbody>
+</table></section><section class="slide" data-repl-context="FEN" id="our-test-cases"><h2>Our test cases</h2>
+<p>After 3. cxd5 <code>rnbqkbnr/pp2pppp/2p5/3P4/3P4/8/PP2PPPP/RNBQKBNR b KQkq - 0 3</code></p>
+<p>After 9. O-O <code>r2qkb1r/pp3ppp/2n1pn2/3p4/3P4/2N1PB2/PP3PPP/R1BQ1RK1 b kq - 1 9</code></p>
+<p>After 49. Bf5+ <code>8/7k/p4K2/P4B1P/1P6/8/8/8 b - - 2 49</code></p></section><section class="slide" data-repl-context="FEN" id="models"><h2>Models</h2>
+<pre class="haskell"><code>type File = Char
+type Rank = Char
+type Square = (File, Rank)</code></pre>
+<pre class="haskell"><code>data Color = White | Black
+data Piece = Pawn | Knight | Bishop | Rook | Queen | King
+
+data SquareContent = ColoredPiece Piece Color | Void</code></pre></section><section class="slide" data-repl-context="FEN" id="models-1"><h2>Models</h2>
+<pre class="haskell"><code>type Position = [[SquareContent]]
+type EnPassant = Maybe Square
+data CastlingCapacity = CanLongCastle Color | CanShortCastle Color
+
+data Board = Board Position Color [CastlingCapacity] EnPassant Int Int</code></pre></section><section class="slide repl" data-repl-context="FEN" id="simple-parsers"><h2>Simple parsers</h2>
+<pre class="haskell"><code>parseFile :: Parser File
+parseFile = oneOf &quot;abcdefgh&quot;</code></pre>
+<pre class="haskell"><code>parseRank :: Parser File
+parseRank = oneOf &quot;12345678&quot;</code></pre>
+<pre class="haskell"><code>parseSquare :: Parser Square
+parseSquare = do
+  file &lt;- parseFile
+  rank &lt;- parseRank
+  return (file, rank)</code></pre></section><section class="slide" data-repl-context="FEN" id="applicative-style"><h2>Applicative style</h2>
+<pre class="haskell"><code>parseSquare&#39; :: Parser Square
+parseSquare&#39; = mkSquare &lt;$&gt; parseFile &lt;*&gt; parseRank
+  where mkSquare f r = (f, r)</code></pre>
+<pre class="haskell"><code>parseSquare&#39;&#39; :: Parser Square
+parseSquare&#39;&#39; = (,) &lt;$&gt; parseFile &lt;*&gt; parseRank</code></pre></section><section class="slide repl" data-repl-context="FEN" id="half-moves-and-moves"><h2>Half-moves and moves</h2>
+<pre class="haskell"><code>parseInt :: Parser Int
+parseInt = read &lt;$&gt; many1 digit</code></pre>
+<pre class="haskell"><code>(,,) &lt;$&gt; parseInt &lt;*&gt; space &lt;*&gt; parseInt</code></pre>
+<pre class="haskell"><code>(,) &lt;$&gt; parseInt &lt;* space &lt;*&gt; parseInt</code></pre>
+<pre class="haskell"><code>(,) &lt;$&gt; parseInt &lt;* space
+    &lt;*&gt; parseInt</code></pre></section><section class="slide repl" data-repl-context="FEN" id="alternatives"><h2>Alternatives</h2>
+<pre class="haskell"><code>instance Alternative Parser</code></pre>
+<pre class="haskell"><code>parseColor :: Parser Color
+parseColor = tries [ White &lt;$ char &#39;w&#39;
+                   , Black &lt;$ char &#39;b&#39;
+                   ]</code></pre></section><section class="slide repl" data-repl-context="FEN" id="more-complex-parsers"><h2>More complex parsers</h2>
+<pre class="haskell"><code>parseEnPassantSquare :: Parser Square
+parseEnPassantSquare = (,) &lt;$&gt; parseFile &lt;*&gt; oneOf &quot;36&quot;</code></pre>
+<pre class="haskell"><code>parseEnPassant :: Parser EnPassant
+parseEnPassant =
+  tries [ Nothing &lt;$  char &#39;-&#39;
+        , Just    &lt;$&gt; parseEnPassantSquare
+        ]</code></pre></section><section class="slide repl" data-repl-context="FEN" id="more-complex-parsers-1"><h2>More complex parsers</h2>
+<pre class="haskell"><code>parseCastlingCapacity :: Parser CastlingCapacity
+parseCastlingCapacity =
+  tries [ CanLongCastle  White &lt;$ char &#39;Q&#39;
+        , CanShortCastle White &lt;$ char &#39;K&#39;
+        , CanLongCastle  Black &lt;$ char &#39;q&#39;
+        , CanShortCastle Black &lt;$ char &#39;k&#39;
+        ]</code></pre>
+<pre class="haskell"><code>parseCastlingCapacities :: Parser [CastlingCapacity]
+parseCastlingCapacities =
+  tries [ [] &lt;$ char &#39;-&#39;
+        , many parseCastlingCapacity
+        ]</code></pre></section><section class="slide repl" data-repl-context="FEN" id="final-boss"><h2>Final boss</h2>
+<pre class="haskell"><code>parseRow :: Parser [SquareContent]
+parseRow = assuming (ofLength 8) $ mconcat &lt;$&gt; many parseSquareContent</code></pre>
+<pre class="haskell"><code>parsePosition :: Parser Position
+parsePosition = assuming (ofLength 8) $ parseRow `sepBy` char &#39;/&#39;</code></pre></section><section class="slide repl" data-repl-context="FEN" id="all-together"><h2>All together</h2>
+<pre class="haskell"><code>boardParser :: Parser Board
+boardParser = Board &lt;$&gt; parsePosition           &lt;* space
+                    &lt;*&gt; parseColor              &lt;* space
+                    &lt;*&gt; parseCastlingCapacities &lt;* space
+                    &lt;*&gt; parseEnPassant          &lt;* space
+                    &lt;*&gt; parseInt                &lt;* space
+                    &lt;*&gt; parseInt</code></pre></section><section class="slide repl" data-repl-context="FEN" id="use-our-model-a-bit"><h2>Use our model (a bit)</h2>
+<pre class="haskell"><code>colorToMove :: Board -&gt; Color
+colorToMove (Board _ color _ _ _ _) = color</code></pre>
+<pre class="haskell"><code>canWhiteLongCastle :: Board -&gt; Bool
+canWhiteLongCastle (Board _ _ castles _ _ _) = elem whiteLongCastle castles
+  where whiteLongCastle = CanLongCastle White</code></pre></section><script>$(function() { $.deck('.slide', {"designWidth":1600,"designHeight":1000} ); });</script></body></html>

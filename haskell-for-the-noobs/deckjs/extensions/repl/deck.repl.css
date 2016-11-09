@@ -1,0 +1,89 @@
+
+pre.jqconsole {
+  white-space: pre-wrap;
+}
+
+.jqconsole-old-prompt {
+  margin-top: 0.5em;
+  display: block;
+}
+.jqconsole-prompt {
+  margin-top: 0.5em;
+  display: block;
+}
+/* The console container element */
+#console {
+  background-color: #2f1e2e;
+}
+/* The inner console element. */
+.jqconsole {
+    padding: 10px;
+}
+/* The cursor. */
+.jqconsole-cursor {
+    background-color: gray;
+}
+/* The cursor color when the console looses focus. */
+.jqconsole-blurred .jqconsole-cursor {
+    background-color: #666;
+}
+/* The current prompt text color */
+.jqconsole-prompt {
+    color: #fec418;
+}
+/* The command history */
+.jqconsole-old-prompt {
+    color: #fec418;
+    opacity: 0.8;
+    font-weight: normal;
+}
+/* The text color when in input mode. */
+.jqconsole-input {
+    color: #a39e9b;
+}
+/* Previously entered input. */
+.jqconsole-old-input {
+    color: #bb0;
+    font-weight: normal;
+}
+/* The text color of the output. */
+.jqconsole-output {
+    color: white;
+}
+
+.jqconsole-error {
+    color: red;
+}
+
+.repl-slide-columns {
+    display: flex;
+    height: 100%;
+}
+
+.repl-slide-column {
+    order: 1;
+    margin: 10px;
+    width: 100%;
+    height: 100%;
+}
+
+.repl-console-column > div {
+    position: initial !important;
+    height: 60%;
+}
+
+.repl-console-column-fullscreen > div {
+    height: 80%;
+    margin-top: 5%;
+}
+
+div.repl-fullscreen-hint {
+  margin: 0.5em;
+  font-size: 66%;
+  opacity: 0.3;
+  display: none;
+}
+
+.repl-console-column-fullscreen .repl-fullscreen-hint {
+  display: block;
+}

@@ -1,0 +1,15 @@
+h1 {
+  color: #af0;
+}
+
+h2 {
+  color: #0fa;
+}
+
+.presentation-title h1 {
+  color: #0af;
+}
+
+table td {
+  padding: 0.2em 2em;
+}
